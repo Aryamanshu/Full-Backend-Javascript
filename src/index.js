@@ -9,7 +9,7 @@ dotenv.config({
 }) ;
 
 
-
+// connecting database
 connectDB()
 .then(() => {
     app.listen(process.env.PORT || 8000, () => {
