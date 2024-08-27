@@ -85,6 +85,8 @@ const registeruser = asyncHandler( async (req, res) => {    // method toh ban gy
         throw new ApiError(500, "something went wrong registerinng tthe User")
     }
     
+
+    // removeing password and refresh token field from response
     return res.status(201).json(
         new ApiResponse(200, createdUser, "User registered successfully")
     )
