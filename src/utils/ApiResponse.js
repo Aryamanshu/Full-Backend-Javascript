@@ -6,3 +6,6 @@ class ApiResponse extends Response {
         this.success  = statusCode < 400  // ye ham khud set kr rrhe koi asia rule nhi hai
     }
 }
+
+
+export  { ApiResponse }

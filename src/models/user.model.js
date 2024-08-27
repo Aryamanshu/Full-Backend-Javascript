@@ -22,7 +22,7 @@ const userSchema = new Schema({
         lowercase: true,
         trim: true,
     },
-    fullname: {
+    fullName: {
         type: String,
         required: true, 
         trim: true,
@@ -58,7 +58,7 @@ userSchema.pre("save", async function (next) {   // jasie hi user kuch bhi save 
     
     if(!this.isModified("password")) return next(); // ye isliye likha taki jb user password change kre tab hi pre chale wrna user kuch bhi change krega for eg- avatar change krega tab bhi pre chal jayega toh vo galat hai
 
-    this.password = bcrypt.hash(this.password, 10)  // password encrypt hojayega
+    this.password = await bcrypt.hash(this.password, 10)  // password encrypt hojayega
     next()
 })
 
@@ -77,7 +77,7 @@ userSchema.methods.generateAccessToken = function(){
         _id: this._id, // ye sb mongo db database arha hai
         email: this.email,
         username: this.username,
-        fullname: this.fullname
+        fullName: this.fullName
     },
     
     process.env.ACCESS_TOKEN_SECRET,
