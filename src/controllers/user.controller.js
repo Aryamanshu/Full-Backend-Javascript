@@ -14,7 +14,7 @@ const registeruser = asyncHandler( async (req, res) => {    // method toh ban gy
     // steps to register the user:-
     // get user details from frontend
     // validation - not empty
-    // check if user already exists: username, email
+    // check if user already exists: userName, email
     // check for images, check for avatar
     // upload them to cloudinary, avatar
     // create user object - create entry in db
@@ -22,10 +22,10 @@ const registeruser = asyncHandler( async (req, res) => {    // method toh ban gy
     // check for user creation
     // return response
 
-    const {fullName, email, username, password } = req.body  // user ki details ajeyngy yaha se
+    const {fullName, email, userName, password } = req.body  // user ki details ajeyngy yaha se
     //console.log("email: ",email ); // ye check kr rha user se data arha h ki nhi   
 
-    // ye hua normal tarika check krna ka ki empty hai ki nhi aur ab ye baar baar likhna padega email, password, username k liye
+    // ye hua normal tarika check krna ka ki empty hai ki nhi aur ab ye baar baar likhna padega email, password, userName k liye
     // if(fullName === "") {
     //     throw new ApiError(400, "fullname is required")
     // }
@@ -33,32 +33,34 @@ const registeruser = asyncHandler( async (req, res) => {    // method toh ban gy
     
     // ye optimised tariks hai validation ka 
     if (
-        [fullName, email, username, password].some((field) => field?.trim() === "")  //.some js ka method hai
+        [fullName, email, userName, password].some((field) => field?.trim() === "")  //.some js ka method hai
     ) {
         throw new ApiError(400, "All fields are required")
     }
 
     const existedUser = await User.findOne({
-        $or: [{ username }, { email }]  //ab yha intro hua operators ka $or
+        $or: [{ userName }, { email }]  //ab yha intro hua operators ka $or
     })
 
     if(existedUser) { // checking user already exists
         throw new ApiError(409, "User is already existed")  // ab yaha par apiError file ki kitni help ho rhi hai vrna baar baar res.json krna padta
     }
 
+    //console.log(req.files);
+    
     
     //checking avatar and images
-    const avatarlocalPath =  req.files?.avatar[0]?.path        // yha par optional chaing krna better hai
-    const coverImagelocalPath =  req.files?.coverImage[0]?.path
+    const avatarLocalPath =  req.files?.avatar[0]?.path;        // yha par optional chaing krna better hai
+    const coverImageLocalPath =  req.files?.coverImage[0]?.path;
     
-    if (!avatarlocalPath) {
+    if (!avatarLocalPath) {
         throw new ApiError(400, "Avatar file is required")
     }
 
     
     //uploading on cloudinary
-    const avatar =   await uploadOnCloudinary(avatarlocalPath)
-    const coverImage =   await uploadOnCloudinary(coverImagelocalPath)
+    const avatar =   await uploadOnCloudinary(avatarLocalPath)
+    const coverImage =   await uploadOnCloudinary(coverImageLocalPath)
 
     //checking bhut jarrori hai vrna databse phatega
     if(!avatar) {
@@ -74,7 +76,7 @@ const registeruser = asyncHandler( async (req, res) => {    // method toh ban gy
         coverImage: coverImage?.url || "",  // isiliye yaha ye check lgaya hai
         email,
         password,
-        username: username.tolowerCase()
+        userName: userName.toLowerCase()
     })
 
     const createdUser = await User.findById(user._id).select(    //agar yaha se user mil gya toh hi user create hua hai wrnna error
@@ -82,7 +84,7 @@ const registeruser = asyncHandler( async (req, res) => {    // method toh ban gy
     ) 
 
     if(!createdUser) {
-        throw new ApiError(500, "something went wrong registerinng tthe User")
+        throw new ApiError(500, "something went wrong registerinng the User")
     }
     
 

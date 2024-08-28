@@ -7,7 +7,7 @@ import bcrypt from "bcrypt"; // this is for encryption of password but we cant e
 
 
 const userSchema = new Schema({
-    username: {
+    userName: {
         type: String,
         required: true,
         unique: true,
@@ -26,11 +26,11 @@ const userSchema = new Schema({
         type: String,
         required: true, 
         trim: true,
-        index: true
+        index: true,
     },
     avatar: {
         type: String, //cloudinary url use krenge isme
-        required:  true
+        required:  true,
 
     },
     coverImage: {
@@ -76,7 +76,7 @@ userSchema.methods.generateAccessToken = function(){
     jwt.sign({
         _id: this._id, // ye sb mongo db database arha hai
         email: this.email,
-        username: this.username,
+        userName: this.userName,
         fullName: this.fullName
     },
     
@@ -87,7 +87,8 @@ userSchema.methods.generateAccessToken = function(){
 )
 }
 userSchema.methods.generateRefreshToken = function(){
-    jwt.sign({
+    return jwt.sign(
+        {
         _id: this._id, // ye sb mongo db database arha hai
         
     },
