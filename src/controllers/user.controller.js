@@ -31,9 +31,9 @@ const registeruser = asyncHandler( async (req, res) => {    // method toh ban gy
     // }
 
     
-    // ye optimised tariks hai validation ka 
+    // ye optimised tarika hai validation ka 
     if (
-        [fullName, email, userName, password].some((field) => field?.trim() === "")  //.some js ka method hai
+        [fullName, email, userName, password].some(field =>field ===undefined ||  field?.trim() === "") //.some js ka method hai
     ) {
         throw new ApiError(400, "All fields are required")
     }
@@ -50,8 +50,14 @@ const registeruser = asyncHandler( async (req, res) => {    // method toh ban gy
     
     
     //checking avatar and images
-    const avatarLocalPath =  req.files?.avatar[0]?.path;        // yha par optional chaing krna better hai
-    const coverImageLocalPath =  req.files?.coverImage[0]?.path;
+    const avatarLocalPath =  req.files?.avatar[0]?.path;              // yha par optional chaing krna better hai
+    //const coverImageLocalPath =  req.files?.coverImage[0]?.path;     //agr user coverimage ni derha h toh postman me error arha hai vo error is ? ki wajha se arha hai toh isliye image h ki nhi ham noraml if se check krengy
+
+    let coverImageLocalPath;
+    if(req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
+           coverImageLocalPath =  req.files.coverImage[0].path
+    }
+    
     
     if (!avatarLocalPath) {
         throw new ApiError(400, "Avatar file is required")
