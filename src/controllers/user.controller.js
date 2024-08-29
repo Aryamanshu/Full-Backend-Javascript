@@ -6,7 +6,23 @@ import { User } from "../models/user.model.js"
 import { uploadOnCloudinary } from "../utils/cloudinary.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 
+const generateAccessAndRefreshTokens = async(userId) =>  {
+    
+    try {
+        const user = await User.findById(userId)
+        const accessToken = user.generateAccessToken()            //yaha bs token  generate hue h 
+        const refreshToken = user.generateRefreshToken()
 
+        user.refreshToken = refreshToken
+        await user.save({ validateBeforeSave: false })            // method hota hai 
+
+        return {accessToken, refreshToken}
+    
+    } catch (error) {
+        throw new ApiError(500, "Something went wrong while generating Access and Refresh Token")
+
+    }
+}
 
 // ye line 10000 baar likhoge aage projects me
 const registeruser = asyncHandler( async (req, res) => {    // method toh ban gya ab ye use kab hoga, ye use tab hoga jab koi na koi url hit hoga isliye ham routes bnate hai
@@ -102,7 +118,97 @@ const registeruser = asyncHandler( async (req, res) => {    // method toh ban gy
 
 } )
 
+const loginUser = asyncHandler(async (req,res) => { 
+    // req body -> data
+    // username or email
+    //find the user
+    //password check
+    //access and referesh token
+    //send cookie (secure)
+    // response "Login Successfull"
+
+    const {email, userName, password} = req.body
+
+    if(!userName && !email) {
+        throw new ApiError(400, "username or email is required")
+    }
+
+    const user = await User.findOne({
+        $or: [{email}, {userName}],
+    })
+
+    if(!user) {
+        throw new ApiError(404, "User not found")
+    }
+
+    const isPasswordValid = await user.isPasswordCorect(password)    // isPasswordCorect ye phele se hi methoda bnaya hua user.model me
+    
+    if(!isPasswordValid) {
+        throw new ApiError(401, "Invalid password")
+    }
+    const {accessToken, refreshToken} = await generateAccessAndRefreshTokens(user._id)
+
+    // ye optional step hai man h kro nhi h na kro
+    const loggedInUser = user.findById(user._id).
+    select("-password -refreshToken")
+
+
+    // ab bhejni h cookies
+      const options = {
+        httpOnly: true,            // The cookie only accessible by the web server, modifiable nhi hoti hai sirf server modify kr skta hai
+        secure: true
+      }
+
+      return res
+      .status(200)
+      .cookie("accessToken", accessToken, options)
+      .cookie("refreshToken", refreshToken, options)
+      .json(
+        new ApiResponse(                              //agar smjh ni aa rha h toh ApiResponse jaa k dekhlo utile me        
+            200, 
+            {
+                user: loggedInUser, accessToken, refreshToken                    // ye case tab h jb user local me accessToken or refreshToken save krna chaa rha ho
+            },
+            "User Logged in successfully"
+        )
+      )
+
+})
+// logging user out  //iske liye hm apne phele middleware design krengy
+const logoutUser = asyncHandler(async(req, res) => {
+   await User.findByIdAndUpdate(
+    req.user._id,
+    {
+        $set: {
+            refreshToken: undefined
+        }
+    },
+        {
+            new: true
+        },
+    
+   )
+
+const options = {
+    httpOnly: true,
+    secure: true
+}
+
+return res
+.status(200)
+.clearCookie("accessToken", options)
+.clearCookie("refreshToken", options)
+.json(new ApiResponse(200, {}, "User logged Out"))
+
+})
+
+
+
+
+
 
 export {
     registeruser,
+    loginUser,
+    logoutUser
 }

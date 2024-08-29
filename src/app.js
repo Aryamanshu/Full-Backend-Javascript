@@ -7,7 +7,7 @@ const app = express()
 
 //app.use(cors())  // noramlly asie cors configure hojata hai but agar options bhi dene ho toh -
 app.use(cors({
-    origin: process.env.CORS_ORIGIN,
+    origin: process.env.CORS_ORIGIN, 
     credentials: true,
 }))
 
