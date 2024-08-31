@@ -73,7 +73,7 @@ userSchema.methods.isPasswordCorrect = async function
 
 
 userSchema.methods.generateAccessToken = function(){
-    jwt.sign({
+    return jwt.sign({
         _id: this._id, // ye sb mongo db database arha hai
         email: this.email,
         userName: this.userName,

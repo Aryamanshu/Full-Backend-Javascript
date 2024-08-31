@@ -2,15 +2,13 @@
 //ye ek tarika hai aur neexhe ek aur tarika hai, ye production level codee hai 
 
 const asyncHandler = (requestHandler) => {
-   return (req, res, next) => {
-        Promise.resolve(requestHandler(req, res, next))
-        .catch((err) => next(err))
+    return (req, res, next) => {
+        Promise.resolve(requestHandler(req, res, next)).catch((err) => next(err))
     }
 }
 
 
-
-export {asyncHandler}
+export { asyncHandler }
 
 
 
