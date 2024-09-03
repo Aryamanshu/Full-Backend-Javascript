@@ -16,12 +16,14 @@ router.route("/register").post( // fields me bhut sare options hote hai abhi bs 
         maxCount: 1
        } 
     ]),
-    registeruser)
+    registeruser
+)
 
     router.route("/login").post(loginUser)
 
 //secured Routes
 router.route("/logout").post(verifyJWT, logoutUser)
+
 
 
 

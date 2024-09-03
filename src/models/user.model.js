@@ -38,7 +38,7 @@ const userSchema = new Schema({
     },
     watchHistory: [   // aise isliye likh rhe kyuki watchhistory dependent hai video par
         {
-            type: Schema.Types.ObjectId,   // akelaa watchHistory hi is project ko bhut complex and next level bnaa ta hai
+            type: Schema.Types.ObjectId,   // akela watchHistory hi is project ko bhut complex and next level bnaa ta hai
             ref: "video"
         }
     ],

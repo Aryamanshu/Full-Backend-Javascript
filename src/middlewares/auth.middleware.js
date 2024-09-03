@@ -6,9 +6,9 @@ import jwt from "jsonwebtoken"
 import { User } from "../models/user.model.js";
 
 
-export const verifyJWT = asyncHandler(async (req, res, next) => {
+export const verifyJWT = asyncHandler(async (req, _, next) => {   // _  ye "res" ka notation hai
    try {
-    const token = req.cookies?.accesstoken ||            //cookies me se token leleo ya authorization se me lelo
+    const token = req.cookies?.accessToken ||            //cookies me se token leleo ya authorization se me lelo
     req.header("Authorizaition")?.replace("Bearer", "")  // bearer given hota hai islye use empty string se replace ke rhre hai
  
  
