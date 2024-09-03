@@ -23,6 +23,7 @@ router.route("/register").post( // fields me bhut sare options hote hai abhi bs 
 
 //secured Routes
 router.route("/logout").post(verifyJWT, logoutUser)
+router.route("/refresh-token").post(refreshAccessToken)
 
 
 

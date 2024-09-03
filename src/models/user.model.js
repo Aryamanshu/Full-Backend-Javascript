@@ -71,7 +71,7 @@ userSchema.methods.isPasswordCorrect = async function
 
 } // await isliye kyu ki cryptography hai toh time lgta h isliye async and await
 
-
+// generating accessToken
 userSchema.methods.generateAccessToken = function(){
     return jwt.sign({
         _id: this._id, // ye sb mongo db database arha hai
@@ -86,6 +86,7 @@ userSchema.methods.generateAccessToken = function(){
     }
 )
 }
+// generating refreshToken
 userSchema.methods.generateRefreshToken = function(){
     return jwt.sign(
         {

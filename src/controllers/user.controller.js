@@ -206,16 +206,57 @@ const logoutUser = asyncHandler(async(req, res) => {
 })
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
-    const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
+    const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken   //accesing refreshToken through cookies
 
-    if(incomingRefreshToken) {
+    
+    // if we didint get the refreshToken and ye token hme user bhej rha hai
+    if(incomingRefreshToken) {                                
         throw new ApiError(401, "Unauthorized Request")
     }
 
-    jwt.verify(
-        incomingRefreshToken,
-        process.env.REFRESH_TOKEN_SECRET,
-    )
+//for safety purpose error na aajye thats why try catch 
+   try {
+     const decodedToken = jwt.verify(                             // verifying jo refrshToken aarha hai
+         incomingRefreshToken,               // verify krwane k liye ek token bhejna padta hai 
+         process.env.REFRESH_TOKEN_SECRET,   //aur ek secret information bhejni padti hai
+     ) 
+ 
+     const user = await User.findById(decodedToken?._id)
+     
+     if(!user) {                               
+         throw new ApiError(401, "Invalid refersh token")
+     }
+     
+     // ab hm token match krwayengy jo user ne bhej hai and us token ko use kr rk hm jo user dhoondengy us token ko
+     if(incomingRefreshToken !== user?.refreshToken) {
+         throw new ApiError(401, "Refrsh Token is expired or used")
+     }
+ 
+     const options = {
+         httpOnly: true,
+         secure: true
+     }
+ 
+     //we are genearting here new access and refresh token from the method we cretaed above at line no. 11
+     const {accessToken, newRefreshToken} = await generateAccessAndRefreshTokens(user._id)  
+ 
+     return res
+     .status(200)
+     .cookie("accessToken", accessToken, options)
+     .cookie("refreshToken", newRefreshToken, options)
+     .json(
+         new ApiResponse(
+             200, 
+             { accessToken, refershToken: newRefreshToken},
+             "Access TOKEN refreshed successfully"
+             
+         )
+     )
+  
+   } catch (error) {
+    throw new ApiError(401, error?.message || "Invalid refresh token")
+    
+   }
 })
 
 
@@ -226,5 +267,6 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 export {
     registeruser,
     loginUser,
-    logoutUser
+    logoutUser,
+    refreshAccessToken
 }
