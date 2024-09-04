@@ -2,10 +2,6 @@ import mongoose, {Schema} from "mongoose";
 import jwt from "jsonwebtoken"; // jwt hamara bearer token hai (bearer mtlb ye token jis k bhi pass hai vo mujhe ye bhejega m use data bhej dunga)
 import bcrypt from "bcrypt"; // this is for encryption of password but we cant encrypt directly so we use some hooks from mongoose
 
-
-
-
-
 const userSchema = new Schema({
     userName: {
         type: String,

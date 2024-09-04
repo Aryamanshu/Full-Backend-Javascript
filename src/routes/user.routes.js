@@ -45,6 +45,4 @@ router.route("/c/:username").get(verifyJWT, getUserChannelProfile)  ///c/: k baa
 router.route("/history").get(verifyJWT, getWatchHistory)
 
 
-
-
 export default router
