@@ -274,7 +274,7 @@ const changeCurrentpassword = asyncHandler(async(req, res) => {
    await user.save({validateBeforeSave: false})  // ye database se arrha hai
 
    return res
-   .sttaus(200)
+   .status(200)
    .json(new ApiResponse(200, {}, "Password is changed Successfully"))
 }) 
 
@@ -379,6 +379,77 @@ const updateUserCoverImage = asyncHandler(async(req, res) => {
 
 
 
+//yaha par hm aggregation pipeline likhengy very important for join operations
+// very very important
+const getUserChannelProfile = asyncHandler(async(req, res) => {
+    const {userName} = req.params
+
+    if(!userName?.trim()) {
+        throw new ApiError(400, "userName is missing")
+}
+
+    const channel = await User.aggregate([
+        {
+            $match: {
+                userName: userName?.toLowerCase()
+            }
+        },
+        {  //yaha par sare subscribers find hogye hai
+           //1st pipeline
+        $lookup: {
+            from: "subscriptions",    //yha par subscription model se Subscription model uthaya hai ut as we learned earlier databse me sb plural and lowercase me ho jata hai
+            localField: "_id",
+            foreignField: "channel",
+            as: "subscribers"
+          }
+        },
+        {   //yaha par maine khudne kitne ko subscribe kiya ha vo nikal rhe hai
+            //2nd pipeline
+            $lookup: {
+                from: "subscriptions",    
+                localField: "_id",
+                foreignField: "subscriber",
+                as: "subscribedTo"
+            }
+        },
+        {    // adding both the fields and adding new fields
+             //3rd pipeline
+            $addFields: {
+                subscriberCount: {
+                    $size: "$subscribers"          //"$" isliye use kiya kyu ki subscriber field h ab
+                    
+                },
+                channelsSubcribedToCount : {
+                    $size: "$subscribedTo"
+                },
+                isSubscribed: {
+                    $cond: {
+                        if: {$in: [req.user?._id, "$subscriber.subscriber"]},
+                        then: true,
+                        else: false
+                    },
+                }
+            }
+        },
+        {   // project me jo doge toh vo chala jayega
+            $project: {
+                fullName: 1,
+                userName: 1,
+                subscriberCount: 1,
+                channelsSubcribedToCount: 1,
+                avatar: 1,
+                coverImage: 1,
+                email: 1
+            }
+        }
+    ])
+
+    if(!channel?.length) {
+        throw new ApiError(404, "channel does not exists")
+    }
+})
+
+
 
 export {
     registeruser,
@@ -389,5 +460,6 @@ export {
     getCurrentUser,
     updateAccountDetails,
     updateUserAvatar,
-    updateUserCoverImage 
+    updateUserCoverImage,
+    getUserChannelProfile 
 }
