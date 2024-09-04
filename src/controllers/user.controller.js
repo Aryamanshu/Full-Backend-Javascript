@@ -456,6 +456,64 @@ const getUserChannelProfile = asyncHandler(async(req, res) => {
 })
 
 
+//nested lookup krna padega kyuki jaise hi watchHistory pr lookup lagyengy vo user k pass jayega jaha bhut sari aru cheeze bhi hai toh ham turnt ek aur lookup lga dengy hme job bhi chaiye uska
+const getWatchHistory = asyncHandler(async(req, res) => {
+    const user = await User.aggregate([
+        {
+            $match: {
+                _id: new mongoose.Types.ObjectId(req.user._id)   // hme kabhi bhi req.user._id krte hai toh hme mongoDb id nhi milti hme string milte h jo mongoose ne apne aap convert kri hui hoti h behind the scenes
+            }
+        },
+        {
+            $lookup: {
+                from: "videos",
+                localField: "watchHistory",
+                foreignField: "_id",
+                as: "watchHistory",
+                pipeline: [
+                    {
+                        $lookup: {
+                            from: "users",
+                            localField: "owner",
+                            foreignField: "_id",
+                            as: "owner",
+                            pipeline: [
+                                {
+                                    $project: {                //upar wali pipeline se owner se bhut kuch ajata toh jiski zaroorat nhi h usko project me daal diya
+                                        fullName: 1,
+                                        userName: 1,
+                                        avatar: 1
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {                             //ye pipeline isliye kyu hamra pass sari values array me ayengy toh frontend ki easy k liye ye pipeline likh rhe h 
+                       $addFields: {
+                        owner: {
+                            $first: "owner"    // ab kya hoga seedhe ek object mil jayega owner aur fir . lgaa k sari values nikal skte hai
+                        }
+                       }
+                    }
+                ]
+            }
+        }
+    ])
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200, 
+            user[0].watchHistory,
+            "watch history fetched successfully"
+
+        )
+    )
+
+})
+
+
 
 export {
     registeruser,
@@ -467,5 +525,7 @@ export {
     updateAccountDetails,
     updateUserAvatar,
     updateUserCoverImage,
-    getUserChannelProfile 
+    getUserChannelProfile,
+    getWatchHistory
+     
 }
