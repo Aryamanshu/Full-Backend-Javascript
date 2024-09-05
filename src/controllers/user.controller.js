@@ -6,6 +6,7 @@ import { User} from "../models/user.model.js"
 import {uploadOnCloudinary} from "../utils/cloudinary.js"
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken"
+import mongoose from "mongoose";
 
 
 const generateAccessAndRefreshTokens = async(userId) =>  {
@@ -356,7 +357,7 @@ const updateUserCoverImage = asyncHandler(async(req, res) => {
 
    const coverImage = await uploadOnCloudinary(coverImageLocalPath)
 
-   if(!avatar.url) {
+   if(!coverImage.url) {
     throw new ApiError(400, "Error while uploading on cloudinary")
    }
 
